@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice TK25{{ invoice_number }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .company { font-size: 18px; font-weight: bold; }
+        .company-details { margin-top: 5px; }
+        .section { margin-top: 20px; }
+        .trainer-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .trainer-table th, .trainer-table td { border: 1px solid #333; padding: 4px 8px; text-align: center; }
+        .trainer-table th { background: #f0f0f0; }
+        .summary {
+            margin-top: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: left;
+            background: #f0f0f0;
+            padding: 10px 0 10px 20px;
+        }
+        .summary-table {
+            width: 60%;
+            margin: 20px 0 0 0;
+            border-collapse: collapse;
+        }
+        .summary-table td {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        .summary-table .label {
+            text-align: left;
+            width: 60%;
+        }
+        .summary-table .value {
+            text-align: left;
+            width: 40%;
+        }
+        .billto-block {
+            border:1px solid #ccc; padding:10px; max-width:600px; margin: 0 auto 20px auto; background: #f9f9f9;
+        }
+        .billto-title { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
+        .billto-row { margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company">RealYourself Cyberenqueteur Bhavyanshu Pvt. Ltd. (Thinkersklub)</div>
+        <div class="company-details">
+            Address:  135/45 KA, Hansnagar colony, Para, Lucknow, Uttar Pradesh 226009<br>
+            PAN: AAOCR2929L
+            <table style="width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0; margin-top:4px;">
+                <tr>
+                    <td style="text-align:left; width:50%; vertical-align:top;"><b>Invoice Number:</b> {{ invoice_number }}</td>
+                    <td style="text-align:right; width:50%; vertical-align:top;">
+                        <b>Invoice Date:</b> {{ invoice_date|default:'-' }} <br>
+                        <b>Due Date:</b> {{ due_date|default:'-' }} <br>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="billto-block">
+        
+        <div style="border:1px solid #333; padding:10px; background:#f9f9f9;">
+            <div class="billto-row">
+                <b>Bill To</b> <br>
+                 
+                <b>School Name:</b> {{ school_name|default:'-' }} <br>
+                <b>School Address:</b> {{ school_address|default:'-' }} <br>
+                <b>Contact Person:</b> {{ contact_person|default:'-' }} <br>
+                <b>School Contact:</b> {{ school_contact|default:'-' }}
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <table class="trainer-table">
+            <thead>
+                <tr>
+                    <th>Sr. No.</th>
+                    <th>Trainer Name</th>
+                    <th>No. of Working Days</th>
+                    <th>Total Salary (Rs)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trainer, days, total in trainers %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ trainer }}</td>
+                    <td>{{ days }}</td>
+                    <td>{{ total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="summary" style="text-align: right;">
+        Subtotal: {{ subtotal|default:'0' }}
+    </div>
+    <table style="width:100%; max-width:1000px; margin:30px auto 0 auto; table-layout:fixed; border-spacing:18px; border-collapse:separate;">
+        <tr>
+            <td style="vertical-align:top; width:50%; border:1px solid #333; padding:10px; background:#f9f9f9;">
+                <div class="billto-row">
+                    <b>Payment & Summary</b> <br>
+                    <b>Paid Amount:</b> {{ paid_amount|default:'0' }} <br>
+                    <b>Pay Date:</b> {{ pay_date|default:'-' }} <br>
+                    <b>Mode:</b> {{ pay_mode|default:'-' }} <br>
+                    <b>Cheque/Transaction No.:</b> {{ pay_ref|default:'-' }}
+                </div>
+            </td>
+            <td style="vertical-align:top; width:50%; border:1px solid #333; padding:10px; background:#f9f9f9;">
+                <div>
+                    <b>Taxes (if applicable):</b> {{ taxes|default:'0' }} <br>
+                    <b>GST (%):</b> {{ gst_percent|default:'0' }} <br>
+                    <b>GST Amount:</b> {{ gst_amount|default:'0' }} <br>
+                    <b>Other Charges:</b> {{ other_charges|default:'0' }} <br>
+                    <b>Discount:</b> {{ discount|default:'0' }} <br>
+                    <b>Amount in Words:</b> {{ amount_words|default:'-' }}
+                </div>
+                <div style="margin-top:18px; font-size:16px; font-weight:bold; text-align:right;">
+                    <span><b>Total Amount Payable:</b> {{ total|default:'0' }}</span>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <div style="margin-top:40px; text-align:right; font-weight:bold; font-size:15px;">
+        Authorised Signature<br>
+        Divyanshu Singh<br>
+        Founder
+    </div>
+</body>
+</html>

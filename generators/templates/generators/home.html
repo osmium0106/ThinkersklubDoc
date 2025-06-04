@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thinkersklub Generators</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6fa; }
+        header { background: #22223b; color: #fff; padding: 1rem 2rem; display: flex; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; }
+        nav { margin-left: 2rem; }
+        nav a { color: #fff; text-decoration: none; margin-right: 1.5rem; font-size: 1.1rem; }
+        nav a.active, nav a:hover { border-bottom: 2px solid #4ea8de; }
+        .container { max-width: 600px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
+        h2 { color: #22223b; }
+        form { margin-top: 1.5rem; }
+        label { display: block; margin-top: 1rem; }
+        input, select { width: 100%; padding: 0.5rem; margin-top: 0.3rem; border: 1px solid #ccc; border-radius: 4px; }
+        button { margin-top: 1.5rem; padding: 0.7rem 2rem; background: #4ea8de; color: #fff; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
+        button:hover { background: #22223b; }
+    </style>
+    <script>
+        function showForm(formId) {
+            document.querySelectorAll('.gen-form').forEach(f => f.style.display = 'none');
+            document.getElementById(formId).style.display = 'block';
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            document.getElementById('nav-' + formId).classList.add('active');
+        }
+        window.onload = function() {
+            showForm('invoice');
+        };
+    </script>
+</head>
+<body>
+    <header>
+        <span class="logo">Thinkersklub</span>
+        <nav>
+            <a href="/invoice/" id="nav-invoice">Invoice Generator</a>
+            <a href="#" id="nav-salary" onclick="showForm('salary');return false;">Salary Slip Generator</a>
+            <a href="#" id="nav-other" onclick="showForm('other');return false;">Other Generator</a>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="invoice" class="gen-form">
+            <h2>Invoice Generator</h2>
+            <p>Click the Invoice Generator tab above to open the detailed invoice form.</p>
+        </div>
+        <div id="salary" class="gen-form" style="display:none;">
+            <h2>Salary Slip Generator</h2>
+            <form>
+                <label>Employee Name <input type="text" name="employee_name" required></label>
+                <label>Salary Amount <input type="number" name="salary_amount" required></label>
+                <label>Month <input type="month" name="month" required></label>
+                <button type="submit">Generate Salary Slip</button>
+            </form>
+        </div>
+        <div id="other" class="gen-form" style="display:none;">
+            <h2>Other Generator</h2>
+            <form>
+                <label>Title <input type="text" name="title" required></label>
+                <label>Description <input type="text" name="description"></label>
+                <button type="submit">Generate</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

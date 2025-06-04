@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator | Thinkersklub</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6fa; }
+        header { background: #22223b; color: #fff; padding: 1.5rem 2rem; text-align: center; }
+        .logo { font-size: 2rem; font-weight: bold; letter-spacing: 2px; }
+        .company-details { margin-top: 0.5rem; font-size: 1rem; }
+        .container { max-width: 900px; margin: 2rem auto; background: #fff; padding: 2rem 2.5rem; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
+        h2 { color: #22223b; margin-bottom: 1.2rem; text-align: center; }
+        form label { display: block; margin-top: 1rem; font-weight: 500; }
+        input, select { width: 100%; padding: 0.5rem; margin-top: 0.3rem; border: 1px solid #ccc; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: center; }
+        th { background: #f0f4fa; }
+        .add-btn, .remove-btn { background: #4ea8de; color: #fff; border: none; border-radius: 4px; padding: 0.3rem 0.8rem; cursor: pointer; font-size: 1rem; }
+        .remove-btn { background: #e63946; }
+        .center { text-align: center; }
+        .section { margin-top: 30px; }
+        .section h3 { margin-bottom: 8px; }
+        .bill-to { border: 1px solid #ccc; padding: 10px; max-width: 400px; }
+        .download-btn {
+            margin-top: 2.5rem;
+            background: linear-gradient(90deg, #4ea8de 0%, #4361ee 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.9rem 2.2rem;
+            font-size: 1.15rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px #4ea8de33;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .download-btn:hover {
+            background: linear-gradient(90deg, #4361ee 0%, #4ea8de 100%);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .download-btn::before {
+            content: '\1F4E5'; /* inbox tray emoji as icon */
+            font-size: 1.2em;
+            display: inline-block;
+        }
+    </style>
+    <script>
+        // School data
+        const schools = {
+            'Shemford Futuristic School': {
+                address: 'Gorabarik, Sultanpur, Uttar Pradesh 228001',
+                contact_person: 'Mr. Ranjeet Sing',
+                contact: '+91 9818812007'
+            }
+        };
+        function fillSchoolDetails() {
+            const school = document.getElementById('school_name').value;
+            if (schools[school]) {
+                document.getElementById('school_address').innerText = schools[school].address;
+                document.getElementById('contact_person').innerText = schools[school].contact_person;
+                document.getElementById('school_contact').innerText = schools[school].contact;
+            } else {
+                document.getElementById('school_address').innerText = '';
+                document.getElementById('contact_person').innerText = '';
+                document.getElementById('school_contact').innerText = '';
+            }
+        }
+        // Trainer table logic
+        let trainerCount = 1;
+        function addTrainerRow() {
+            trainerCount++;
+            const table = document.getElementById('trainer-table-body');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="sr-no"></td>
+                <td><input type="text" name="trainer_name[]" required style="width: 98%; box-sizing: border-box;"></td>
+                <td><input type="number" name="days[]" min="1" required style="width: 98%; box-sizing: border-box;"></td>
+                <td><input type="number" name="total_salary[]" min="0" required style="width: 98%; box-sizing: border-box;"></td>
+                <td><button type="button" class="remove-btn" onclick="removeTrainerRow(this)">-</button></td>
+            `;
+            table.appendChild(row);
+            updateSrNo();
+            // Attach input event to new total_salary field for live subtotal update
+            row.querySelector('input[name="total_salary[]"]').addEventListener('input', updateSummaryFields);
+        }
+        function removeTrainerRow(btn) {
+            btn.closest('tr').remove();
+            updateSrNo();
+            updateSummaryFields(); // recalculate subtotal after row removal
+        }
+        function updateSrNo() {
+            document.querySelectorAll('#trainer-table-body tr').forEach((row, idx) => {
+                row.querySelector('.sr-no').textContent = idx + 1;
+            });
+        }
+        window.onload = function() {
+            document.getElementById('add-trainer-btn').onclick = addTrainerRow;
+            fillSchoolDetails();
+            updateSrNo();
+        };
+    </script>
+</head>
+<body>
+    <header>
+        <div class="logo">RealYourself Cyberenqueteur Bhavyanshu Pvt. Ltd. (Thinkersklub)</div>
+        <div class="company-details">
+            <div>Address: Para, Lucknow 226001</div>
+            <div>PAN: AAOCR2929L</div>
+            <div style="text-align:left; margin-top:4px;"><b>Invoice Number:</b> TK25{{ invoice_number }}</div>
+        </div>
+    </header>
+    <div class="container">
+        <h2>Invoice Generator</h2>
+        <form method="post" id="invoice-form" action="/generate-invoice/">
+            {% csrf_token %}
+            <div class="center">
+                <label><b>Invoice Number:</b> <input type="text" name="invoice_number" value="TK25{{ invoice_number }}" readonly></label><br>
+            </div>
+            <div class="center" style="display: flex; gap: 1.5rem; justify-content: center; align-items: flex-end; margin-bottom: 1rem;">
+                <label style="flex:1; min-width:0;"><b>Invoice Date:</b> <input type="date" name="invoice_date" value="2025-06-04" required></label>
+                <label style="flex:1; min-width:0;"><b>Due Date:</b> <input type="date" name="due_date" value="{{ due_date }}" required></label>
+            </div>
+            <label>School Name
+                <select name="school_name" id="school_name" onchange="fillSchoolDetails()">
+                    <option value="Shemford">Shemford Futuristic School</option>
+                </select>
+            </label>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Sr. No.</th>
+                        <th style="width: 200px;">Trainer Name</th>
+                        <th style="width: 150px;">No. of Working Days</th>
+                        <th style="width: 180px;">Total Salary (₹)</th>
+                        <th style="width: 60px;"><button type="button" class="add-btn" id="add-trainer-btn">+</button></th>
+                    </tr>
+                </thead>
+                <tbody id="trainer-table-body">
+                    <tr>
+                        <td class="sr-no">1</td>
+                        <td><input type="text" name="trainer_name[]" required style="width: 98%; box-sizing: border-box;"></td>
+                        <td><input type="number" name="days[]" min="1" required style="width: 98%; box-sizing: border-box;"></td>
+                        <td><input type="number" name="total_salary[]" min="0" required style="width: 98%; box-sizing: border-box;"></td>
+                        <td><button type="button" class="remove-btn" onclick="removeTrainerRow(this)">-</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top:2rem; max-width:500px; text-align:left; margin-left:0;">
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <div style="display: flex; gap: 2rem;">
+                        <label style="flex:1; min-width:0;">Subtotal <input type="number" id="subtotal" name="subtotal" readonly style="width:95%;"></label>
+                        <label style="flex:1; min-width:0;">Taxes (if applicable) <input type="number" id="taxes" name="taxes" value="0" style="width:95%;"></label>
+                    </div>
+                    <div style="display: flex; gap: 2rem;">
+                        <label style="flex:1; min-width:0;">GST (%) <input type="number" id="gst_percent" name="gst_percent" value="0" style="width:95%;"></label>
+                        <label style="flex:1; min-width:0;">GST Amount <input type="number" id="gst_amount" name="gst_amount" value="0" readonly style="width:95%;"></label>
+                    </div>
+                    <div style="display: flex; gap: 2rem;">
+                        <label style="flex:1; min-width:0;">Other Charges <input type="number" id="other_charges" name="other_charges" value="0" style="width:95%;"></label>
+                        <label style="flex:1; min-width:0;">Discount <input type="number" id="discount" name="discount" value="0" style="width:95%;"></label>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 2rem;">
+                    <label style="flex:1; min-width:0;">Paid Amount <input type="number" id="paid_amount" name="paid_amount" value="0" style="width:95%;"></label>
+                    <label style="flex:1; min-width:0;">Pay Date <input type="date" id="pay_date" name="pay_date" style="width:95%;"></label>
+                </div>
+                <div style="display: flex; gap: 2rem;">
+                    <label style="flex:1; min-width:0;">Mode
+                        <select id="pay_mode" name="pay_mode" style="width:95%;">
+                            <option value="">Select</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Cheque">Cheque</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </label>
+                    <label style="flex:1; min-width:0;">Cheque/Transaction No. <input type="text" id="pay_ref" name="pay_ref" style="width:95%;"></label>
+                </div>
+                <label><b>Total Amount Payable</b> <input type="number" id="total" name="total" readonly required></label>
+                <label>Amount in Words <input type="text" id="amount_words" name="amount_words" readonly></label>
+            </div>
+            <script>
+                function updateSummaryFields() {
+                    // Calculate subtotal
+                    let subtotal = 0;
+                    document.querySelectorAll('input[name="total_salary[]"]').forEach(inp => {
+                        subtotal += parseFloat(inp.value) || 0;
+                    });
+                    document.getElementById('subtotal').value = subtotal.toFixed(2);
+                    // Taxes, GST, Other Charges, Discount, Paid Amount
+                    let taxes = parseFloat(document.getElementById('taxes').value) || 0;
+                    let gst_percent = parseFloat(document.getElementById('gst_percent').value) || 0;
+                    let gst_amount = subtotal * gst_percent / 100;
+                    document.getElementById('gst_amount').value = gst_amount.toFixed(2);
+                    let other_charges = parseFloat(document.getElementById('other_charges').value) || 0;
+                    let discount = parseFloat(document.getElementById('discount').value) || 0;
+                    let paid_amount = parseFloat(document.getElementById('paid_amount').value) || 0;
+                    let total = subtotal + taxes + gst_amount + other_charges - discount - paid_amount;
+                    document.getElementById('total').value = total.toFixed(2);
+                    document.getElementById('amount_words').value = numberToWords(total);
+                }
+                function numberToWords(num) {
+                    if (isNaN(num) || num === 0) return 'Zero';
+                    const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+                    const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+                    function inWords(n) {
+                        if (n < 20) return a[Math.floor(n)];
+                        if (n < 100) return b[Math.floor(n / 10)] + (n % 10 ? ' ' + a[n % 10] : '');
+                        if (n < 1000) return a[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' and ' + inWords(n % 100) : '');
+                        if (n < 100000) return inWords(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 ? ' ' + inWords(n % 1000) : '');
+                        if (n < 10000000) return inWords(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 ? ' ' + inWords(n % 100000) : '');
+                        return '';
+                    }
+                    return inWords(Math.floor(num)) + ' Rupees Only';
+                }
+                // Attach events
+                window.addEventListener('DOMContentLoaded', function() {
+                    document.querySelectorAll('input[name="total_salary[]"], #taxes, #gst_percent, #other_charges, #discount, #paid_amount').forEach(inp => {
+                        inp.addEventListener('input', updateSummaryFields);
+                    });
+                    updateSummaryFields();
+                });
+            </script>
+            <div class="center">
+                <button type="submit" class="download-btn">Generate & Download Invoice</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
