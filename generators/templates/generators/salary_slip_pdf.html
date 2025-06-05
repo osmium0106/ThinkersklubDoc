@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Salary Slip</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .company { font-size: 18px; font-weight: bold; }
+        .company-details { margin-top: 5px; }
+        .section { margin-top: 20px; }
+        .box-block { border:1px solid #333; padding:10px; background:#f9f9f9; margin-bottom: 18px; max-width: 600px; margin-left:auto; margin-right:auto; }
+        .box-title { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; }
+        td, th { padding: 4px 8px; border: none; }
+        .label { font-weight: bold; width: 220px; text-align:left; }
+        .value { text-align:left; }
+        .footer { text-align: center; margin-top: 2rem; font-size: 0.95em; color: #555; border-top: 1px solid #eee; padding-top: 1rem; }
+        .signatory { margin-top: 2rem; text-align: right; }
+        .sign-space { height: 40px; border-bottom: 1px solid #888; width: 200px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company">RealYourself Cyberenqueteur Bhavyanshu Pvt. Ltd. (Thinkersklub)</div>
+        <div class="company-details">
+            Address:  135/45 KA, Hansnagar colony, Para, Lucknow, Uttar Pradesh 226009<br>
+            PAN: AAOCR2929L
+            <div style="margin-top:4px; font-size:14px;"><b>Salary Slip</b></div>
+            <div style="font-size:13px;">{{ month }} {{ year }}</div>
+        </div>
+    </div>
+    <div>
+        <b>Employee Details </b> </div>
+    <div class="box-block">
+        <b>Employee Name:</b> {{ employee_name }} <br>
+        <b>Employee ID:</b> {{ employee_id }} <br>
+        <b>Designation:</b> {{ designation }} <br>
+        <b>Date of Joining:</b> {{ date_of_joining }} <br>
+        <b>PAN Number:</b> {{ pan_number }}
+    </div>
+    <div>
+        <b>Salary Details </b> <br>
+        <table style="margin-top: 6px; width: 100%; border-collapse: collapse; border: 1px solid #333;">
+            <tr>
+                <td class="label" style="border-bottom:1px solid #ccc; border-right:1px solid #ccc; border-left:1px solid #333;">Basic Salary (Rs)</td>
+                <td class="value" style="border-bottom:1px solid #ccc; border-right:1px solid #333;">{{ basic_salary }}</td>
+            </tr>
+            <tr>
+                <td class="label" style="border-bottom:1px solid #ccc; border-right:1px solid #ccc; border-left:1px solid #333;">Allowances (Rs)</td>
+                <td class="value" style="border-bottom:1px solid #ccc; border-right:1px solid #333;">{{ allowances }}</td>
+            </tr>
+            <tr>
+                <td class="label" style="border-bottom:1px solid #ccc; border-right:1px solid #ccc; border-left:1px solid #333;">Deductions (Rs)</td>
+                <td class="value" style="border-bottom:1px solid #ccc; border-right:1px solid #333;">{{ deductions }}</td>
+            </tr>
+            <tr>
+                <td class="label" style="border-right:1px solid #ccc; border-left:1px solid #333;"><b>Net Salary (Rs)</b></td>
+                <td class="value" style="border-right:1px solid #333;"><b>{{ net_salary }}</b></td>
+            </tr>
+        </table><br>
+    </div>
+    <div><b>Attendance Details </b></div>
+    <div class="box-block">
+        <b>Total Working Days in Month:</b> {{ total_working_days }} <br>
+        <b>Days Present:</b> {{ days_present }} <br>
+        <b>Days Absent / Leave:</b> {{ days_absent }} <br>
+        <b>Overtime Hours:</b> {{ overtime_hours }}
+    </div>
+    <div>
+        <b>Additional Details </b> </div>
+    <div class="box-block">
+        <b>Bank Account Number:</b> {{ bank_account }} <br>
+        <b>Payment Date:</b> {{ payment_date }} <br>
+        <b>Payment Method:</b> {{ payment_mode }} <br>
+        <b>Transaction ID:</b> {{ transaction_id }}
+    </div>
+    <div class="signatory">
+        <div>Authorized Signatory:<br>
+             Divyanshu Singh <br>
+            Founder <span class="sign-space"></span></div>
+        {% if authorized_signatory %}<div style="margin-top:0.5rem;">({{ authorized_signatory }})</div>{% endif %}
+    </div>
+    <div class="footer">
+        RealYourself Cyberenqueteur Bhavyanshu Pvt. Ltd. (Thinkersklub) | Address: Para, Lucknow 226001 | PAN: AAOCR2929L<br>
+        This is a computer generated salary slip and does not require a physical signature.
+    </div>
+</body>
+</html>

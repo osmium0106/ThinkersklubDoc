@@ -6,6 +6,7 @@ import os
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 from io import BytesIO
+from django.views.decorators.csrf import csrf_exempt
 
 def home(request):
     return render(request, 'generators/home.html')
@@ -100,3 +101,65 @@ def invoice(request):
             if pisa_status.err:
                 return HttpResponse('Error generating PDF', status=500)
             return response
+
+def salary_slip(request):
+    from datetime import datetime
+    current_year = datetime.now().year
+    current_month = datetime.now().strftime('%B')
+    if request.method == 'GET':
+        return render(request, 'generators/salary_slip.html', {
+            'year': current_year,
+            'month': current_month,
+            'current_year': current_year
+        })
+    elif request.method == 'POST':
+        employee_name = request.POST.get('employee_name')
+        employee_id = request.POST.get('employee_id')
+        designation = request.POST.get('designation')
+        date_of_joining = request.POST.get('date_of_joining')
+        pan_number = request.POST.get('pan_number')
+        month = request.POST.get('month')
+        year = request.POST.get('year')
+        basic_salary = float(request.POST.get('basic_salary') or 0)
+        allowances = float(request.POST.get('allowances') or 0)
+        deductions = float(request.POST.get('deductions') or 0)
+        net_salary = float(request.POST.get('net_salary') or 0)
+        total_working_days = request.POST.get('total_working_days')
+        days_present = request.POST.get('days_present')
+        days_absent = request.POST.get('days_absent')
+        overtime_hours = request.POST.get('overtime_hours')
+        bank_account = request.POST.get('bank_account')
+        payment_mode = request.POST.get('payment_mode')
+        payment_date = request.POST.get('payment_date')
+        transaction_id = request.POST.get('transaction_id')
+        remarks = request.POST.get('remarks')
+        authorized_signatory = request.POST.get('authorized_signatory')
+        context = {
+            'employee_name': employee_name,
+            'employee_id': employee_id,
+            'designation': designation,
+            'date_of_joining': date_of_joining,
+            'pan_number': pan_number,
+            'month': month,
+            'year': year,
+            'basic_salary': f'{basic_salary:.2f}',
+            'allowances': f'{allowances:.2f}',
+            'deductions': f'{deductions:.2f}',
+            'net_salary': f'{net_salary:.2f}',
+            'total_working_days': total_working_days,
+            'days_present': days_present,
+            'days_absent': days_absent,
+            'overtime_hours': overtime_hours,
+            'bank_account': bank_account,
+            'payment_date': payment_date,
+            'payment_mode': payment_mode,
+            'transaction_id': transaction_id,
+            'authorized_signatory': authorized_signatory,
+        }
+        html = render_to_string('generators/salary_slip_pdf.html', context)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename=SalarySlip_{employee_id}_{month}_{year}.pdf'
+        pisa_status = pisa.CreatePDF(html, dest=response)
+        if pisa_status.err:
+            return HttpResponse('Error generating PDF', status=500)
+        return response

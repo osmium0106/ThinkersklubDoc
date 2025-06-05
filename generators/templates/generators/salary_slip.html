@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Slip Generator | Thinkersklub</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6fa; }
+        .container { max-width: 900px; margin: 2rem auto; background: #fff; padding: 2rem 2.5rem; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
+        h2 { color: #22223b; margin-bottom: 1.2rem; text-align: center; }
+        form label { display: block; margin-top: 0; font-weight: 500; }
+        input, select { width: 100%; padding: 0.5rem; margin-top: 0.3rem; border: 1px solid #ccc; border-radius: 4px; }
+        .center { text-align: center; }
+        .download-btn {
+            margin-top: 2rem;
+            background: linear-gradient(90deg, #4ea8de 0%, #4361ee 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.9rem 2.2rem;
+            font-size: 1.15rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px #4ea8de33;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .download-btn:hover {
+            background: linear-gradient(90deg, #4361ee 0%, #4ea8de 100%);
+            transform: translateY(-2px) scale(1.03);
+        }
+        footer { margin-top: 2.5rem; font-size: 0.95em; color: #555; border-top: 1px solid #eee; padding-top: 1rem; }
+        form .row-pair {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Salary Slip Generator</h2>
+        <div style="text-align:center; font-size:1.1rem; color:#22223b; margin-bottom:1.2rem;">
+        </div>
+        <form method="post" action="/generate-salary-slip/">
+            {% csrf_token %}
+            <div style="font-size:1.15rem; font-weight:600; margin-bottom:0.7rem; margin-top:1.2rem;">Employee Details</div>
+            <div class="row-pair">
+                <label style="flex:1;">Employee Name
+                    <select name="employee_name" required>
+                        <option value="">Select Employee</option>
+                        <option value="Abhay Singh">Abhay Singh</option>
+                        <option value="Aman Singh">Aman Singh</option>
+                        <option value="Mayank Singh">Mayank Singh</option>
+                    </select>
+                </label>
+                <label style="flex:1;">Employee ID <input type="text" name="employee_id" required readonly></label>
+            </div>
+            <div class="row-pair">
+                <label style="flex:1;">Designation
+                    <select name="designation" required>
+                        <option value="">Select Designation</option>
+                        <option value="Trainer">Trainer</option>
+                        <option value="Founder">Founder</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </label>
+                <label style="flex:1;">Date of Joining <input type="date" name="date_of_joining" placeholder="dd-mm-yyyy" readonly></label>
+            </div>
+            <div class="row-pair">
+                <label style="flex:1;">PAN Number <input type="text" name="pan_number" readonly></label>
+                <div style="flex:1;"></div>
+            </div>
+            <div style="font-size:1.15rem; font-weight:600; margin-bottom:0.7rem; margin-top:2.2rem;">Salary Details</div>
+            <div class="row-pair">
+                <label style="flex:1;">Month
+                    <select name="month" required>
+                        <option value="January" {% if month == 'January' %}selected{% endif %}>January</option>
+                        <option value="February" {% if month == 'February' %}selected{% endif %}>February</option>
+                        <option value="March" {% if month == 'March' %}selected{% endif %}>March</option>
+                        <option value="April" {% if month == 'April' %}selected{% endif %}>April</option>
+                        <option value="May" {% if month == 'May' %}selected{% endif %}>May</option>
+                        <option value="June" {% if month == 'June' %}selected{% endif %}>June</option>
+                        <option value="July" {% if month == 'July' %}selected{% endif %}>July</option>
+                        <option value="August" {% if month == 'August' %}selected{% endif %}>August</option>
+                        <option value="September" {% if month == 'September' %}selected{% endif %}>September</option>
+                        <option value="October" {% if month == 'October' %}selected{% endif %}>October</option>
+                        <option value="November" {% if month == 'November' %}selected{% endif %}>November</option>
+                        <option value="December" {% if month == 'December' %}selected{% endif %}>December</option>
+                    </select>
+                </label>
+                <label style="flex:1;">Year <input type="number" name="year" min="2000" max="2100" value="{{ year|default:current_year }}" required></label>
+            </div>
+            <div class="row-pair">
+                <label style="flex:1;">Basic Salary (₹) <input type="number" name="basic_salary" min="0" required readonly></label>
+                <label style="flex:1;">Allowances (₹) <input type="number" name="allowances" min="0" value="0" required oninput="calculateNetSalary()"></label>
+            </div>
+            <div class="row-pair">
+                <label style="flex:1;">Deductions (₹) <input type="number" name="deductions" min="0" value="0" required oninput="calculateNetSalary()"></label>
+                <label style="flex:1;">Net Salary (₹) <input type="number" name="net_salary" min="0" required readonly></label>
+            </div>
+            <div style="margin-top:1.5rem; font-weight:600;">Attendance Details (optional)</div>
+            <div class="row-pair">
+                <label style="flex:1;">Total Working Days in Month <input type="number" name="total_working_days" min="0" required></label>
+                <label style="flex:1;">Days Present <input type="number" name="days_present" min="0"></label>
+            </div>
+            <div class="row-pair">
+                <label style="flex:1;">Days Absent / Leave <input type="number" name="days_absent" min="0"></label>
+                <label style="flex:1;">Overtime Hours <input type="number" name="overtime_hours" min="0"></label>
+            </div>
+            <div style="margin-top:1.5rem; font-weight:600;">Additional Details</div>
+            <div class="row-pair">
+                <label style="flex:1;">Bank Account Number <input type="text" name="bank_account" readonly></label>
+                <label style="flex:1;">Payment Date <input type="date" name="payment_date"></label>
+            </div>
+            <div class="row-pair">
+                <label style="flex:1;">Payment Method
+                    <select name="payment_mode">
+                        <option value="">Select</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Cheque">Cheque</option>
+                        <option value="UPI">UPI</option>
+                    </select>
+                </label>
+                <label style="flex:1;">Transaction ID <input type="text" name="transaction_id"></label>
+            </div>
+            <div class="center">
+                <button type="submit" class="download-btn">Generate & Download Salary Slip</button>
+            </div>
+        </form>
+        <footer style="margin-top:2.5rem; font-size:0.95em; color:#555; border-top:1px solid #eee; padding-top:1rem; text-align:center;">
+            RealYourself Cyberenqueteur Bhavyanshu Pvt. Ltd. (Thinkersklub) | Address: Para, Lucknow 226001 | PAN: AAOCR2929L<br>
+            This is a computer generated salary slip and does not require a physical signature.
+        </footer>
+    </div>
+    <script>
+        // Employee data for autofill
+        const employees = {
+            'Abhay Singh': {
+                employee_id: 'E001',
+                designation: 'Trainer',
+                date_of_joining: '2022-01-15',
+                pan_number: 'ABCDE1234A',
+                basic_salary: 454,
+                bank_account: '1234567890'
+            },
+            'Aman Singh': {
+                employee_id: 'E002',
+                designation: 'Founder',
+                date_of_joining: '2021-07-01',
+                pan_number: 'FGHIJ5678B',
+                basic_salary: 1000,
+                bank_account: '2345678901'
+            },
+            'Mayank Singh': {
+                employee_id: 'E003',
+                designation: 'Manager',
+                date_of_joining: '2023-03-10',
+                pan_number: 'KLMNO9012C',
+                basic_salary: 800,
+                bank_account: '3456789012'
+            }
+        };
+        function calculateNetSalary() {
+            const basic = parseFloat(document.querySelector('input[name="basic_salary"]').value) || 0;
+            const allowances = parseFloat(document.querySelector('input[name="allowances"]').value) || 0;
+            const deductions = parseFloat(document.querySelector('input[name="deductions"]').value) || 0;
+            const net = basic + allowances - deductions;
+            document.querySelector('input[name="net_salary"]').value = net >= 0 ? net : 0;
+        }
+        function fillEmployeeDetails() {
+            const name = document.querySelector('select[name="employee_name"]').value;
+            const data = employees[name];
+            if (data) {
+                document.querySelector('input[name="employee_id"]').value = data.employee_id;
+                document.querySelector('select[name="designation"]').value = data.designation;
+                document.querySelector('input[name="date_of_joining"]').value = data.date_of_joining;
+                document.querySelector('input[name="pan_number"]').value = data.pan_number;
+                document.querySelector('input[name="basic_salary"]').value = data.basic_salary;
+                document.querySelector('input[name="bank_account"]').value = data.bank_account;
+                calculateNetSalary();
+            } else {
+                document.querySelector('input[name="employee_id"]').value = '';
+                document.querySelector('select[name="designation"]').value = '';
+                document.querySelector('input[name="date_of_joining"]').value = '';
+                document.querySelector('input[name="pan_number"]').value = '';
+                document.querySelector('input[name="basic_salary"]').value = '';
+                document.querySelector('input[name="bank_account"]').value = '';
+                calculateNetSalary();
+            }
+        }
+        // Prefill total working days in month
+        function prefillWorkingDays() {
+            const year = document.querySelector('input[name="year"]').value;
+            const month = document.querySelector('select[name="month"]').selectedIndex + 1;
+            if (year && month) {
+                const days = new Date(year, month, 0).getDate();
+                document.querySelector('input[name="total_working_days"]').value = days;
+            }
+        }
+        window.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('select[name="employee_name"]').addEventListener('change', fillEmployeeDetails);
+            document.querySelector('select[name="month"]').addEventListener('change', prefillWorkingDays);
+            document.querySelector('input[name="year"]').addEventListener('input', prefillWorkingDays);
+            fillEmployeeDetails();
+            prefillWorkingDays();
+        });
+    </script>
+</body>
+</html>
