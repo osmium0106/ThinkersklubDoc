@@ -49,13 +49,15 @@
         }
     </style>
     <script>
-        // School data
+        // School data from Django context
         const schools = {
-            'Shemford Futuristic School': {
-                address: 'Gorabarik, Sultanpur, Uttar Pradesh 228001',
-                contact_person: 'Mr. Ranjeet Sing',
-                contact: '+91 9818812007'
-            }
+            {% for school in schools %}
+            '{{ school.name|escapejs }}': {
+                address: '{{ school.address|escapejs }}',
+                contact_person: '{{ school.contact_person|escapejs }}',
+                contact: '{{ school.contact|escapejs }}'
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
         };
         function fillSchoolDetails() {
             const school = document.getElementById('school_name').value;
@@ -77,7 +79,14 @@
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="sr-no"></td>
-                <td><input type="text" name="trainer_name[]" required style="width: 98%; box-sizing: border-box;"></td>
+                <td>
+                    <select name="trainer_name[]" required style="width: 98%; box-sizing: border-box;" onchange="fillAttendanceDays(this)">
+                        <option value="">Select Trainer</option>
+                        {% for employee in employees %}
+                        <option value="{{ employee.name|escape }}">{{ employee.name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
                 <td><input type="number" name="days[]" min="1" required style="width: 98%; box-sizing: border-box;"></td>
                 <td><input type="number" name="total_salary[]" min="0" required style="width: 98%; box-sizing: border-box;"></td>
                 <td><button type="button" class="remove-btn" onclick="removeTrainerRow(this)">-</button></td>
@@ -97,10 +106,26 @@
                 row.querySelector('.sr-no').textContent = idx + 1;
             });
         }
+        // Attendance data from Django context
+        const attendanceMap = {
+            {% for name, days in attendance_map.items %}
+            '{{ name|escapejs }}': '{{ days }}'{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        };
+        function fillAttendanceDays(sel) {
+            const trainer = sel.value;
+            const row = sel.closest('tr');
+            if (attendanceMap[trainer]) {
+                row.querySelector('input[name="days[]"]').value = attendanceMap[trainer];
+            }
+        }
         window.onload = function() {
             document.getElementById('add-trainer-btn').onclick = addTrainerRow;
             fillSchoolDetails();
             updateSrNo();
+            // Autofill attendance for first row if trainer is selected
+            const firstTrainerSel = document.querySelector('select[name="trainer_name[]"]');
+            if (firstTrainerSel) fillAttendanceDays(firstTrainerSel);
         };
     </script>
 </head>
@@ -129,7 +154,9 @@
             </div>
             <label>School Name
                 <select name="school_name" id="school_name" onchange="fillSchoolDetails()">
-                    <option value="Shemford">Shemford Futuristic School</option>
+                    {% for school in schools %}
+                    <option value="{{ school.name|escape }}">{{ school.name }}</option>
+                    {% endfor %}
                 </select>
             </label>
             <table>
@@ -145,7 +172,14 @@
                 <tbody id="trainer-table-body">
                     <tr>
                         <td class="sr-no">1</td>
-                        <td><input type="text" name="trainer_name[]" required style="width: 98%; box-sizing: border-box;"></td>
+                        <td>
+                            <select name="trainer_name[]" required style="width: 98%; box-sizing: border-box;" onchange="fillAttendanceDays(this)">
+                                <option value="">Select Trainer</option>
+                                {% for employee in employees %}
+                                <option value="{{ employee.name|escape }}">{{ employee.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
                         <td><input type="number" name="days[]" min="1" required style="width: 98%; box-sizing: border-box;"></td>
                         <td><input type="number" name="total_salary[]" min="0" required style="width: 98%; box-sizing: border-box;"></td>
                         <td><button type="button" class="remove-btn" onclick="removeTrainerRow(this)">-</button></td>

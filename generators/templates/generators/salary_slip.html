@@ -49,11 +49,11 @@
             <div style="font-size:1.15rem; font-weight:600; margin-bottom:0.7rem; margin-top:1.2rem;">Employee Details</div>
             <div class="row-pair">
                 <label style="flex:1;">Employee Name
-                    <select name="employee_name" required>
+                    <select name="employee_name" id="employee_name" required>
                         <option value="">Select Employee</option>
-                        <option value="Abhay Singh">Abhay Singh</option>
-                        <option value="Aman Singh">Aman Singh</option>
-                        <option value="Mayank Singh">Mayank Singh</option>
+                        {% for employee in employees %}
+                        <option value="{{ employee.name|escape }}">{{ employee.name }}</option>
+                        {% endfor %}
                     </select>
                 </label>
                 <label style="flex:1;">Employee ID <input type="text" name="employee_id" required readonly></label>
@@ -141,30 +141,16 @@
     <script>
         // Employee data for autofill
         const employees = {
-            'Abhay Singh': {
-                employee_id: 'E001',
-                designation: 'Trainer',
-                date_of_joining: '2022-01-15',
-                pan_number: 'ABCDE1234A',
-                basic_salary: 454,
-                bank_account: '1234567890'
-            },
-            'Aman Singh': {
-                employee_id: 'E002',
-                designation: 'Founder',
-                date_of_joining: '2021-07-01',
-                pan_number: 'FGHIJ5678B',
-                basic_salary: 1000,
-                bank_account: '2345678901'
-            },
-            'Mayank Singh': {
-                employee_id: 'E003',
-                designation: 'Manager',
-                date_of_joining: '2023-03-10',
-                pan_number: 'KLMNO9012C',
-                basic_salary: 800,
-                bank_account: '3456789012'
-            }
+            {% for employee in employees %}
+            '{{ employee.name|escapejs }}': {
+                employee_id: '{{ employee.employee_id|escapejs }}',
+                designation: '{{ employee.designation|escapejs }}',
+                date_of_joining: '{{ employee.date_of_joining|date:'Y-m-d' }}',
+                pan_number: '{{ employee.pan_number|escapejs }}',
+                basic_salary: '{{ employee.basic_salary|default:'' }}',
+                bank_account: '{{ employee.bank_account|escapejs }}'
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
         };
         function calculateNetSalary() {
             const basic = parseFloat(document.querySelector('input[name="basic_salary"]').value) || 0;
@@ -203,12 +189,53 @@
                 document.querySelector('input[name="total_working_days"]').value = days;
             }
         }
+        // Attendance data from Django context
+        const attendanceMap = {
+            {% for name, days in attendance_map.items %}
+            '{{ name|escapejs }}': {
+                {% for month, present in days.items %}
+                '{{ month|escapejs }}': '{{ present }}'{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        };
+        function prefillDaysPresent() {
+            const empSel = document.getElementById('employee_name');
+            const emp = empSel ? empSel.value : '';
+            const monthSel = document.querySelector('select[name="month"]');
+            const month = monthSel ? monthSel.value : '';
+            if (attendanceMap[emp] && attendanceMap[emp][month]) {
+                document.querySelector('input[name="days_present"]').value = attendanceMap[emp][month];
+            } else {
+                document.querySelector('input[name="days_present"]').value = '';
+            }
+        }
+        function prefillDaysAbsent() {
+            const total = parseInt(document.querySelector('input[name="total_working_days"]').value) || 0;
+            const present = parseInt(document.querySelector('input[name="days_present"]').value) || 0;
+            const absent = total - present;
+            document.querySelector('input[name="days_absent"]').value = absent >= 0 ? absent : '';
+        }
         window.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('select[name="employee_name"]').addEventListener('change', fillEmployeeDetails);
-            document.querySelector('select[name="month"]').addEventListener('change', prefillWorkingDays);
-            document.querySelector('input[name="year"]').addEventListener('input', prefillWorkingDays);
+            document.getElementById('employee_name').addEventListener('change', function() {
+                fillEmployeeDetails();
+                prefillDaysPresent();
+                prefillDaysAbsent();
+            });
+            document.querySelector('select[name="month"]').addEventListener('change', function() {
+                prefillDaysPresent();
+                prefillDaysAbsent();
+            });
+            document.querySelector('input[name="year"]').addEventListener('input', function() {
+                prefillDaysPresent();
+                prefillDaysAbsent();
+            });
+            document.querySelector('input[name="total_working_days"]').addEventListener('input', prefillDaysAbsent);
+            document.querySelector('input[name="days_present"]').addEventListener('input', prefillDaysAbsent);
             fillEmployeeDetails();
             prefillWorkingDays();
+            prefillDaysPresent();
+            prefillDaysAbsent();
         });
     </script>
 </body>

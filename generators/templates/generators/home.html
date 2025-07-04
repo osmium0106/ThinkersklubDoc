@@ -5,29 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thinkersklub Generators</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6fa; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6fa; min-height: 100vh; }
         header { background: #22223b; color: #fff; padding: 1rem 2rem; display: flex; align-items: center; }
         .logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; }
         nav { margin-left: 2rem; }
         nav a { color: #fff; text-decoration: none; margin-right: 1.5rem; font-size: 1.1rem; }
         nav a.active, nav a:hover { border-bottom: 2px solid #4ea8de; }
-        .container { max-width: 600px; margin: 2rem auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
+        .container { width: 100vw; max-width: none; min-height: 100vh; margin: 0; background: #fff; padding: 2rem 0; border-radius: 0; box-shadow: 0 2px 8px #0001; display: flex; flex-direction: column; justify-content: flex-start; }
         h2 { color: #22223b; }
         form { margin-top: 1.5rem; }
         label { display: block; margin-top: 1rem; }
         input, select { width: 100%; padding: 0.5rem; margin-top: 0.3rem; border: 1px solid #ccc; border-radius: 4px; }
         button { margin-top: 1.5rem; padding: 0.7rem 2rem; background: #4ea8de; color: #fff; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
         button:hover { background: #22223b; }
+        .header { text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 2rem; }
+        .tab-container {
+            width: 96vw;
+            max-width: 1400px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #0001;
+            padding: 2rem;
+        }
+        .tab-buttons { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+        .tab-btn { background: #4ea8de; color: #fff; border: none; border-radius: 6px 6px 0 0; padding: 0.7rem 2.2rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .tab-btn.active, .tab-btn:hover { background: #4361ee; }
+        .tab-content { display: block; }
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .data-table th, .data-table td { border: 1px solid #ccc; padding: 0.6rem 1rem; text-align: left; }
+        .data-table th { background: #f0f4fa; }
+        @media (max-width: 1200px) {
+            .tab-container { max-width: 99vw; padding: 1rem; }
+        }
     </style>
     <script>
         function showForm(formId) {
             document.querySelectorAll('.gen-form').forEach(f => f.style.display = 'none');
             document.getElementById(formId).style.display = 'block';
             document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-            document.getElementById('nav-' + formId).classList.add('active');
+            if(formId === 'invoice') {
+                document.getElementById('nav-invoice').classList.add('active');
+            } else if(formId === 'salary') {
+                document.getElementById('nav-salary').classList.add('active');
+            } else if(formId === 'other') {
+                document.getElementById('nav-other').classList.add('active');
+            } else if(formId === 'home') {
+                document.getElementById('nav-home').classList.add('active');
+            }
+        }
+        function showTab(tab) {
+            document.getElementById('employee-tab').style.display = tab === 'employee' ? 'block' : 'none';
+            document.getElementById('school-tab').style.display = tab === 'school' ? 'block' : 'none';
+            document.getElementById('attendance-tab').style.display = tab === 'attendance' ? 'block' : 'none';
+            var btns = document.querySelectorAll('.tab-btn');
+            btns[0].classList.toggle('active', tab === 'employee');
+            btns[1].classList.toggle('active', tab === 'school');
+            btns[2].classList.toggle('active', tab === 'attendance');
         }
         window.onload = function() {
-            showForm('invoice');
+            document.getElementById('nav-home').classList.add('active');
         };
     </script>
 </head>
@@ -35,16 +72,14 @@
     <header>
         <span class="logo">Thinkersklub</span>
         <nav>
+            <a href="/" id="nav-home" class="active">Home</a>
             <a href="/invoice/" id="nav-invoice">Invoice Generator</a>
             <a href="/salary-slip/" id="nav-salary">Salary Slip Generator</a>
             <a href="#" id="nav-other" onclick="showForm('other');return false;">Other Generator</a>
         </nav>
     </header>
     <div class="container">
-        <div id="invoice" class="gen-form">
-            <h2>Invoice Generator</h2>
-            <p>Click the Invoice Generator tab above to open the detailed invoice form.</p>
-        </div>
+        <div class="header">Home</div>
         <div id="salary" class="gen-form" style="display:none;">
             <h2>Salary Slip Generator</h2>
             <form>
@@ -61,6 +96,94 @@
                 <label>Description <input type="text" name="description"></label>
                 <button type="submit">Generate</button>
             </form>
+        </div>
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showTab('employee')">Employees</button>
+                <button class="tab-btn" onclick="showTab('school')">Schools</button>
+                <button class="tab-btn" onclick="showTab('attendance')">Attendance</button>
+            </div>
+            <div class="tab-content" id="employee-tab">
+                <h2>Employee List</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Employee ID</th>
+                            <th>Designation</th>
+                            <th>Date of Joining</th>
+                            <th>PAN Number</th>
+                            <th>Bank Account</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emp in employees %}
+                        <tr>
+                            <td>{{ emp.name }}</td>
+                            <td>{{ emp.employee_id }}</td>
+                            <td>{{ emp.designation }}</td>
+                            <td>{{ emp.date_of_joining }}</td>
+                            <td>{{ emp.pan_number }}</td>
+                            <td>{{ emp.bank_account }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6">No employees found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-content" id="school-tab" style="display:none;">
+                <h2>School List</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Address</th>
+                            <th>Contact Person</th>
+                            <th>Contact Number</th>
+                            <th>PAN Number</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for school in schools %}
+                        <tr>
+                            <td>{{ school.name }}</td>
+                            <td>{{ school.address }}</td>
+                            <td>{{ school.contact_person }}</td>
+                            <td>{{ school.contact_number }}</td>
+                            <td>{{ school.pan_number }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5">No schools found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-content" id="attendance-tab" style="display:none;">
+                <h2>Employee Attendance</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Employee Name</th>
+                            <th>Month</th>
+                            <th>Year</th>
+                            <th>Total Present</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for att in attendances %}
+                        <tr>
+                            <td>{{ att.employee.name }}</td>
+                            <td>{{ att.month }}</td>
+                            <td>{{ att.year }}</td>
+                            <td>{{ att.total_present }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4">No attendance records found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </body>
